@@ -35,7 +35,7 @@ $(source_dir)/unfunc.o: $(source_dir)/unfunc.c
 .PHONY : clean
 
 clean: 
-	rm -rf $(source_dir)/$(objects)
+	rm -rf $(source_dir)/$(objects) $(source_dir)/*.d  $(source_dir)/i80.o
 
 install:
 	sudo cp $(bin_dir)/$(prog_name) /usr/local/bin/
