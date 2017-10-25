@@ -1,0 +1,9 @@
+i80 is a i8080 emulator. 
+You can compile and execute a i8080 code. 
+For more infomation type : i80 -h.
+
+Too install type :
+make && make install
+
+ 
+
