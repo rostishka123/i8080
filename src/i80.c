@@ -15,79 +15,43 @@
 #include "../include/cpu.h"
 #include "../include/selector.h"
 
-char *get_code(int *fd){
-	limit=-1;
-	char *code=NULL, *temp;
-	while(*fd!=-1){
-		temp = read_codefd(*fd);
-		code = realloc(code, strlen(temp));
-		strcat(code, temp);
-		free(temp);
-		close(*fd++);
-	}
-	
-	ch_append(code, '\n');
-	return code;
-}
 
-char *get_line(){
-	int i=0;
-	char c;
-	char *str = (char *) malloc(20);
-	while((c=getchar())!=EOF){
-		i++;
-		if(c=='\n')
-			break;
-		else
-			*str++=c;
-		
-		if(i==20){
-			str = realloc(str, strlen(str)+i);
-		}
-	}
-	if(!(strlen(str)%20))
-		str = realloc(str, strlen(str)+1);
-	*str='\0';
-	return str;
-}
-
-
-int compiler(char *code){
-	char *line, *text, *ccode;
+char* compiler(char *text, int *lines){
+	char line[MAXLINE+1], *ret, *code=NULL;
 	int l, i, n, byte, li, len;
-	text=NULL;
-	text = (char *) malloc(strlen(code));
-	strcpy(text, code);
 	
-	ccode = genschtalt(text, &l);
-	if(error)
-		return l;
+
+	ret = (char *) malloc(strlen(text));
+	strcpy(ret, text);
+	code = genschtalt(ret, &l);
 	
-	free(text);
+	if(error){
+		*lines=l;
+		return NULL;
+	}
+	free(ret);
+	ret=NULL;
 	
-	code=NULL;
 	l=1;
+	len=0;
 	
 	while(1){
-		line = NULL;
-		li=len=0;
 		
-		while(*ccode!='\n'){							//bug in get_line
-			if(*ccode=='\0')
-				goto end;
-			line = realloc(line, len+1);
-			line[li++]=*ccode++;
-			len++;
-		}
-		ccode++;
-		line = realloc(line, len+1);
-		line[li]='\0';
+		if(*code=='\0')
+			break;
 		
-		if(!len){
+		li=0;
+		while(*code!='\n')
+			line[li++]=*code++;
+		
+		line[li]='\0';	
+		code++;
+		
+		if(!li){
 			l++;
 			continue;
 		}
-
+		
 		n = quantity_args(line);
 		if((i=compile(line, n, &byte))==-1){
 			if(error)
@@ -96,106 +60,157 @@ int compiler(char *code){
 		}
 		
 		out_order(line, i, byte*3);
-		
-		code = realloc(code, len+1);	
-		strcat(code, line);
-		
+		if(line!=NULL){
+			len+=strlen(line);
+			ret = realloc(ret, len+1);
+			strcat(ret, line);
+		}	
 		l++;
-		free(line);
 	}
-	end:
-	if(error)
-		return l;
-	if(fd_out==STDOUT){
-		code = realloc(code, strlen(code)+1);
-		strcat(code, "\n");
+	
+	if(error){
+		return NULL;
+		*lines = l;
 	}
-	free(ccode);
-	return 0;
+	return ret;
 	
 }
 
-int execute(char *bin){
-	int ret;
+int execute_str(char *bin){
 	int *code;
-	char *reg_str, *com;
-	error=0;
+	char *reg_str;
 	
 	code = order_to_int(bin);
-	free(bin);
-	
 	code = realloc(code, (MAX_ADDR+1)*sizeof(int));
+		
+	if(sizeof(code)>MAX_ADDR){
+		error=THE_PROGRAMM_IS_TOO_BIG;
+		return -1;
+	}	
+	
+	begin=pc=code;
+	end=sp=code+MAX_ADDR;
+		
+	
+	if(exec(*pc)==-1){
+		if(ioutput==HUMAN_OUTPUT)
+			printf("Error by executintg instruction number %i. Command: %s\n", prev_com+1, num_to_com(*(begin+prev_com)));
+	}
+			
+	if(pc>end || pc<begin)
+		pc=begin;
+	
+	reg_str=write_regs();
+	if(write(fd_out, reg_str, strlen(reg_str)) < 0)
+		err_sys("Write error");
+				
+	free(code);	
+	return 0;
+}
 
+int execute(char *bin){
+	int *code;
+	char *reg_str;
+	int ret;	
+	
+	code = order_to_int(bin);
+	code = realloc(code, (MAX_ADDR+1)*sizeof(int));
+		
+	if(sizeof(code)>MAX_ADDR){
+		error=THE_PROGRAMM_IS_TOO_BIG;
+		return -1;
+	}	
+	
 	begin=pc=code;
 	end=sp=code+MAX_ADDR;
 
 	while(1){
 		if((ret = exec(*pc))==-1){
-			printf("Error by executintg instruction number %i. Command: %s\n", prev_com, (com=num_to_com(*(begin+prev_com))));
-			free(com);
-			break;
+			if(ioutput==HUMAN_OUTPUT)
+				printf("Error by executintg instruction number %i. Command: %s\n", prev_com+1, num_to_com(*(begin+prev_com)));
 		}else if(!ret)
 			break;
-		
+			
+		if(pc>end || pc<begin)
+			pc=begin;
+				
 		if(debug==DEBUG){
-			if((reg_str=write_regs())!=NULL)
-				if(write(fd_out, reg_str, strlen(reg_str)) < 0)
-					err_sys("Write error");
-			free(reg_str);	
+			reg_str=write_regs();
+			if(write(fd_out, reg_str, strlen(reg_str)) < 0)
+				err_sys("Write error");	
 		}
 	}
-	
-	if((reg_str=write_regs())!=NULL && debug==NON_DEBUG)
-		if(write(fd_out, reg_str, strlen(reg_str)) < 0)
-			err_sys("Write error");
+
+	reg_str=write_regs();
+	if(write(fd_out, reg_str, strlen(reg_str)) < 0)
+		err_sys("Write error");
 	
 	free(code);	
+	
 	return 0;
 }
 
 
+
 int main(int argc, char **argv){
-	char *code=NULL;
+	char *code;
+	char *ccode;
 	int l;
-	//init_varibles();
+	init_varibles();
 	set_options(argc, argv);
 	
 	switch(mode){
 		case INTERACTIVE_MODE:
 			while(1){
 				code=get_line();
-				if(!strcmp(code, "q") || !strcmp(code, "quit"))
+				if(!strcmp(code, "q\n") || !strcmp(code, "quit\n"))
 					break;
-				if(compiler(code)){
-					printf("Error : ");
-					error_selector();
-				}else
-					execute(code);
-				free(code);
+				
+				if((ccode=compiler(code, &l))==NULL || !strcmp(code, "\n")){
+					if(error){
+						printf("Error : ");
+						error_selector();
+					} 
+					continue;
+				}else{
+					execute_str(ccode);
+					free(ccode);
+				}
 			}
 		break;
 		
 		case COMPILER_MODE:
 			code = get_code(fd_in);
-			l=compiler(code);
-			errorpl(l);
+			ch_append(code, '\n');
+			ccode=compiler(code, &l);
 			free(code);
+			errorpl(l);
+			
+			if(fd_out==STDOUT)
+				ch_append(ccode, '\n');
+			if(write(fd_out, ccode, strlen(ccode)) < 0)
+				err_sys("Write error");
+			free(ccode);
 		break;
 		
 		case EMULATOR_MODE:
 			limit=MAX_ADDR+1;
-			code = read_codefd(bin_file);
+			ccode = read_codefd(bin_file);
 			errorp();
-			execute(code);
-			free(code);
+			execute(ccode);
+			free(ccode);
 		break;
 		
 		case COMPILE_AND_EXECUTE_MODE:
 			code = get_code(fd_in);
-			compiler(code);
-			execute(code);
+			ch_append(code, '\n');
+			ccode=compiler(code, &l);
 			free(code);
+			errorpl(l);
+			execute(ccode);
 		break;
 	}
+
+	
 	return 0;
 }

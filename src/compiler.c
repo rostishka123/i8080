@@ -373,6 +373,8 @@ static int lxic(char *com, char *arg){
 static int two_arg(char *line, int *byte){
 	char com[MAXLINE], arg[MAXLINE];
 	int i;
+	
+
 	split_two(line, com, arg);	
 	
 	if((i=movc(line))!=-1){
@@ -439,27 +441,28 @@ char *genschtalt(char *text, int *lines){
 	char *code = (char *) malloc(strlen(text));
 	char *line;
 	int i, l=1, addr=0, n, li, len;
-	
+
 	while(1){
 		line = NULL;
 		li=len=0;
-		
+		if(*text=='\0')
+			break;
 		while(*text!='\n'){							//bug in get_line
-			if(*text=='\0')
-				goto endi;
+			
 			line = realloc(line, len+1);
 			line[li++]=*text++;
 			len++;
 		}
-		text++;
+
 		line = realloc(line, len+1);
 		line[li]='\0';
+		text++;
 		
 		if(!len){
 			l++;
 			continue;
 		}
-
+		
 		if(strlen(line)>MAXLINE){
 			error=STRING_TOO_LONG;
 			return NULL;
@@ -484,7 +487,7 @@ char *genschtalt(char *text, int *lines){
 			label(line, 0, addr);
 			continue;
 		}
-
+		
 		if((i=bytes_com(line, n))==-1){
 			error=COMMAND_NOT_FOUND;
 			if(lines!=NULL)
@@ -497,11 +500,12 @@ char *genschtalt(char *text, int *lines){
 		addr+=i;
 		free(line);
 		l++;
+		
 	}
-	endi:
+	strcat(code, "\n");
 	if(lines!=NULL)
 		*lines=0;
-	
+
 	return code;
 }
 

@@ -48,6 +48,34 @@ char *read_codefd(int fd){
 	return code;
 }
 
+char *get_line(){
+	int i=0;
+	char c;
+	static char str[MAXLINE+1];
+	str[0]='\0';
+	
+	while((c=getchar())!=EOF){
+		str[i++]=c;
+		if(c=='\n')
+			break;
+	}
+	str[i]='\0';
+	return str;
+}
+
+char *get_code(int *fd){
+	limit=-1;
+	char *code=NULL, *temp;
+	while(*fd!=-1){
+		temp = read_codefd(*fd);
+		code = realloc(code, strlen(temp));
+		strcat(code, temp);
+		free(temp);
+		close(*fd++);
+	}
+	return code;
+}
+
 int is_keyword(char *line){
 	int i;
 	const char keywords[93][5]={

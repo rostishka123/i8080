@@ -17,182 +17,145 @@ void init_varibles(){
 }	
 
 char *machine_print(){
-	char *str=NULL;
-	char *arg = (char *) malloc(7);
-	int len=0;
+	static char str[120];
+	char arg[6];
+	
+	//
 	
 	itoa(cf, arg);
-	str=realloc(str, (len+=strlen(arg)));
 	strcat(str, arg);
 	strcat(str, " ");
 	
 	itoa(p, arg);
-	str=realloc(str, (len+=strlen(arg)));
 	strcat(str, arg);
 	strcat(str, " ");
 	
 	itoa(ax, arg);
-	str=realloc(str, (len+=strlen(arg)));
 	strcat(str, arg);
 	strcat(str, " ");
 	
 	itoa(z, arg);
-	str=realloc(str, (len+=strlen(arg)));
 	strcat(str, arg);
 	strcat(str, " ");
 	
 	itoa(p, arg);
-	str=realloc(str, (len+=strlen(arg)));
 	strcat(str, arg);
-	str=realloc(str, (len+=1));
 	strcat(str, " ");
 	
+	//
+	
 	itoa(a, arg);
-	str=realloc(str, (len+=strlen(arg)));
 	strcat(str, arg);
 	strcat(str, " ");
 	
 	itoa(b, arg);
-	str=realloc(str, (len+=strlen(arg)));
 	strcat(str, arg);
 	strcat(str, " ");
 	
 	itoa(c, arg);
-	str=realloc(str, (len+=strlen(arg)));
 	strcat(str, arg);
 	strcat(str, " ");
 	
 	itoa(d, arg);
-	str=realloc(str, (len+=strlen(arg)));
 	strcat(str, arg);
 	strcat(str, " ");
 	
 	itoa(e, arg);
-	str=realloc(str, (len+=strlen(arg)));
 	strcat(str, arg);
 	strcat(str, " ");
 	
 	itoa(h, arg);
-	str=realloc(str, (len+=strlen(arg)));
 	strcat(str, arg);
 	strcat(str, " ");
 
 	itoa(l, arg);
-	str=realloc(str, (len+=strlen(arg)));
 	strcat(str, arg);
 	strcat(str, " ");
 	
+	//
+	
 	itoa(pc-begin, arg);
-	str=realloc(str, (len+=strlen(arg)+1));
 	strcat(str, arg);
 	strcat(str, " ");
 	
 	itoa(sp-begin, arg);
-	str=realloc(str, (len+=strlen(arg)+1));
 	strcat(str, arg);
 	strcat(str, "\n");
+	
 	return str;
 }
 
 char *human_print(){
-	char *str = (char *) malloc(1);
-	char *arg = (char *) malloc(20);
-	int len=0;
+	static char str[166];
+	char arg[6];
+	str[0]='\0';
 	
-	
-	str=realloc(str, (len+=strlen("Flags : cf = ")));
 	strcat(str, "Flags : cf = ");
 	itoa(cf, arg);
-	str=realloc(str, (len+=strlen(arg)));
 	strcat(str, arg);
 	
-	str=realloc(str, (len+=strlen(", p = ")));
 	strcat(str, ", p = ");
 	itoa(p, arg);
-	str=realloc(str, (len+=strlen(arg)));
 	strcat(str, arg);
 	
-	str=realloc(str, (len+=strlen(", ax = ")));
 	strcat(str, ", ax = ");
 	itoa(ax, arg);
-	str=realloc(str, (len+=strlen(arg)));
 	strcat(str, arg);
 	
-	str=realloc(str, (len+=strlen(", z = ")));
 	strcat(str, ", z = ");
 	itoa(z, arg);
-	str=realloc(str, (len+=strlen(arg)));
 	strcat(str, arg);
 	
-	str=realloc(str, (len+=strlen(", s = ")));
 	strcat(str, ", s = ");
 	itoa(s, arg);
-	str=realloc(str, (len+=strlen(arg)));
 	strcat(str, arg);
-	str=realloc(str, (len+=1));
 	strcat(str, "\n");
 	
 	
 	
-	str=realloc(str, (len+=strlen("Registers : a = ")));
 	strcat(str, "Registers : a = ");
 	itoa(a, arg);
-	str=realloc(str, (len+=strlen(arg)));
 	strcat(str, arg);
 	
-	str=realloc(str, (len+=strlen(", b = ")));
 	strcat(str, ", b = ");
 	itoa(b, arg);
-	str=realloc(str, (len+=strlen(arg)));
 	strcat(str, arg);
 	
-	str=realloc(str, (len+=strlen(", c = ")));
 	strcat(str, ", c = ");
 	itoa(c, arg);
-	str=realloc(str, (len+=strlen(arg)));
 	strcat(str, arg);
 	
-	str=realloc(str, (len+=strlen(", d = ")));
 	strcat(str, ", d = ");
 	itoa(d, arg);
-	str=realloc(str, (len+=strlen(arg)));
 	strcat(str, arg);
 	
-	str=realloc(str, (len+=strlen(", e = ")));
 	strcat(str, ", e = ");
 	itoa(e, arg);
-	str=realloc(str, (len+=strlen(arg)));
 	strcat(str, arg);
 	
-	str=realloc(str, (len+=strlen(", h = ")));
 	strcat(str, ", h = ");
 	itoa(h, arg);
-	str=realloc(str, (len+=strlen(arg)));
 	strcat(str, arg);
 	
-	str=realloc(str, (len+=strlen(", l = ")));
 	strcat(str, ", l = ");
 	itoa(l, arg);
-	str=realloc(str, (len+=strlen(arg)));
 	strcat(str, arg);
 	strcat(str, "\n");
 	
-	str=realloc(str, (len+=strlen("Addresses : pc = ")));
+	
+
 	strcat(str, "Addresses : pc = ");
 	itoa(pc-begin, arg);
-	str=realloc(str, (len+=strlen(arg)+1));
 	strcat(str, arg);
 
-	
-	str=realloc(str, (len+=strlen(", sp = ")));
 	strcat(str, ", sp = ");
 	itoa(sp-begin, arg);
-	str=realloc(str, (len+=strlen(arg)+1));
 	strcat(str, arg);
 	strcat(str, "\n");
 	
 	return str;
 }
+
 
 int dec_output(char *line, int code, int byte){
 	int i=byte-bytes(code);
@@ -238,6 +201,7 @@ int byte_output(char *line, int code, int byte){
 		strcpy(line, com);
 		free(str);
 		free(com);
+	
 	}
 	
 	strcpy(line, spltob(line));
@@ -471,6 +435,8 @@ static int order_options(){
 				return -1;
 			}
 			fd_out=STDOUT;
+			out_order=byte_output;
+			write_regs = human_print;
 			
 		break;
 		case COMPILER_MODE:
@@ -506,6 +472,12 @@ static int order_options(){
 			else 
 				write_regs = human_print;
 			
+			if(mode==COMPILE_AND_EXECUTE_MODE){
+				if(output==DEC_OUTPUT)
+					out_order=dec_output;
+				else 
+					out_order=byte_output;
+			}
 		break;
 		default :
 			error=MODE_ERROR;
@@ -524,5 +496,3 @@ void set_options(int argc, char **argv){
 
 	errorp();
 }
-
-

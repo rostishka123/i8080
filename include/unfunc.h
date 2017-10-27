@@ -32,6 +32,8 @@ int limit;
 #define IS_NOT_SOURCE_CODE 14
 #define NOT_RIGHT_ARGUMENT_FOR_THIS_MODE 15
 #define ARGUMEN_NOT_FOUND 16
+#define NOT_INDIFICATET_COMMAND 17
+#define THE_PROGRAMM_IS_TOO_BIG 18
 #define ERROR 255
 
 #define NOT_KOMENT (!(str[0]>='0' && str[0]<='9'))
@@ -311,6 +313,8 @@ int limit;
 void err_doit(int, int, const char *, va_list );
 void err_sys(const char *, ...);
 char *read_codefd(int);
+char *get_line();
+char *get_code(int *);
 int is_keyword(char *);
 char *read_code(const char *);
 int strisdigit(char *);

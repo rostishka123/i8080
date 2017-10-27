@@ -4,8 +4,6 @@
 static void jmp_n(int adr){
 	if(pc==begin+adr)
 		new_addr = (pc-begin) + 1;
-	else if(!(adr>=MIN_ADDR && adr>=MAX_ADDR))
-		new_addr=0;
 	else 	
 		new_addr=adr;
 }
@@ -1441,20 +1439,16 @@ static int three_byte_correcting(int *byte){
 
 int exec(){
 	int byte, ret;
-	if((byte = com_bytes(*pc))==-1){
-		
-		return -1;
-	}
-	
+	byte = com_bytes(*pc);
+
 	prev_com=pc-begin;
 	new_addr=-1;
 	flags();
 	
 	three_byte_correcting(pc);
-	
+
 	switch(byte){
 		case 1:
-			
 			ret = one_byte();
 		break;
 		case 2:
@@ -1464,6 +1458,7 @@ int exec(){
 			ret = three_bytes();		
 		break;
 		default:
+			error=NOT_INDIFICATET_COMMAND;
 			return -1;
 	}
 

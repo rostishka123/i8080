@@ -30,6 +30,7 @@ int bin_file;
 int (*out_order)(char*, int, int);
 char *(*write_regs)(void);
 
+
 void init_varibles();
 char *machine_print();
 char *human_print();
