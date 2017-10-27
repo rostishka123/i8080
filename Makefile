@@ -12,7 +12,6 @@ all: $(bin_dir)/$(prog_name)
 $(bin_dir)/$(prog_name): $(objects) $(bin_dir)
 	gcc -o $@ $(compile_flags) $(objects) 
 
-
 $(bin_dir):
 	mkdir $(bin_dir)
 

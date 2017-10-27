@@ -5,5 +5,9 @@ For more infomation type : i80 -h.
 Too install type :
 make && make install
 
- 
+Commands and description i8080 processor :
+http://altairclone.com/downloads/manuals/8080%20Programmers%20Manual.pdf
+https://www.tramm.li/i8080/Intel%208080-8085%20Assembly%20Language%20Programming%201977%20Intel.pdf
 
+wiki:
+https://en.wikipedia.org/wiki/Intel_8080
