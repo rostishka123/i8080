@@ -13,143 +13,7 @@
 #include "../include/unfunc.h"     //universal functions for compiler and cpu 
 #include "../include/compiler.h"
 #include "../include/cpu.h"
-#include "../include/selector.h"
-
-
-char* compiler(char *text, int *lines){
-	char line[MAXLINE+1], *ret, *code=NULL;
-	int l, i, n, byte, li, len;
-	
-
-	ret = (char *) malloc(strlen(text));
-	strcpy(ret, text);
-	code = genschtalt(ret, &l);
-	
-	if(error){
-		*lines=l;
-		return NULL;
-	}
-	free(ret);
-	ret=NULL;
-	
-	l=1;
-	len=0;
-	
-	while(1){
-		
-		if(*code=='\0')
-			break;
-		
-		li=0;
-		while(*code!='\n')
-			line[li++]=*code++;
-		
-		line[li]='\0';	
-		code++;
-		
-		if(!li){
-			l++;
-			continue;
-		}
-		
-		n = quantity_args(line);
-		if((i=compile(line, n, &byte))==-1){
-			if(error)
-				break;
-			continue;
-		}
-		
-		out_order(line, i, byte*3);
-		if(line!=NULL){
-			len+=strlen(line);
-			ret = realloc(ret, len+1);
-			strcat(ret, line);
-		}	
-		l++;
-	}
-	
-	if(error){
-		return NULL;
-		*lines = l;
-	}
-	return ret;
-	
-}
-
-int execute_str(char *bin){
-	int *code;
-	char *reg_str;
-	
-	code = order_to_int(bin);
-	code = realloc(code, (MAX_ADDR+1)*sizeof(int));
-		
-	if(sizeof(code)>MAX_ADDR){
-		error=THE_PROGRAMM_IS_TOO_BIG;
-		return -1;
-	}	
-	
-	begin=pc=code;
-	end=sp=code+MAX_ADDR;
-		
-	
-	if(exec(*pc)==-1){
-		if(ioutput==HUMAN_OUTPUT)
-			printf("Error by executintg instruction number %i. Command: %s\n", prev_com+1, num_to_com(*(begin+prev_com)));
-	}
-			
-	if(pc>end || pc<begin)
-		pc=begin;
-	
-	reg_str=write_regs();
-	if(write(fd_out, reg_str, strlen(reg_str)) < 0)
-		err_sys("Write error");
-				
-	free(code);	
-	return 0;
-}
-
-int execute(char *bin){
-	int *code;
-	char *reg_str;
-	int ret;	
-	
-	code = order_to_int(bin);
-	code = realloc(code, (MAX_ADDR+1)*sizeof(int));
-		
-	if(sizeof(code)>MAX_ADDR){
-		error=THE_PROGRAMM_IS_TOO_BIG;
-		return -1;
-	}	
-	
-	begin=pc=code;
-	end=sp=code+MAX_ADDR;
-
-	while(1){
-		if((ret = exec(*pc))==-1){
-			if(ioutput==HUMAN_OUTPUT)
-				printf("Error by executintg instruction number %i. Command: %s\n", prev_com+1, num_to_com(*(begin+prev_com)));
-		}else if(!ret)
-			break;
-			
-		if(pc>end || pc<begin)
-			pc=begin;
-				
-		if(debug==DEBUG){
-			reg_str=write_regs();
-			if(write(fd_out, reg_str, strlen(reg_str)) < 0)
-				err_sys("Write error");	
-		}
-	}
-
-	reg_str=write_regs();
-	if(write(fd_out, reg_str, strlen(reg_str)) < 0)
-		err_sys("Write error");
-	
-	free(code);	
-	
-	return 0;
-}
-
+#include "../include/logic.h"
 
 
 int main(int argc, char **argv){
@@ -160,12 +24,21 @@ int main(int argc, char **argv){
 	set_options(argc, argv);
 	
 	switch(mode){
+		
 		case INTERACTIVE_MODE:
+			printf("To clear the terminal type : \"clear\"\n"
+			"To quit type : \"q\" or \"quit\"\n");
+			
 			while(1){
+				printf(">> ");
 				code=get_line();
 				if(!strcmp(code, "q\n") || !strcmp(code, "quit\n"))
 					break;
-				
+				if(!strcmp(code, "clear\n")){
+					system("clear");
+					continue;
+				}
+					
 				if((ccode=compiler(code, &l))==NULL || !strcmp(code, "\n")){
 					if(error){
 						printf("Error : ");
@@ -174,6 +47,7 @@ int main(int argc, char **argv){
 					continue;
 				}else{
 					execute_str(ccode);
+					printf("\n");
 					free(ccode);
 				}
 			}
@@ -211,6 +85,5 @@ int main(int argc, char **argv){
 		break;
 	}
 
-	
 	return 0;
 }

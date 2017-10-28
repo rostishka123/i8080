@@ -1,7 +1,7 @@
 #include "../include/unfunc.h"
 #include "../include/cpu.h"
-#include "../include/selector.h"
-
+#include "../include/logic.h"
+#include "../include/compiler.h"
 
 void init_varibles(){
 	debug=NON_DEBUG; 
@@ -156,6 +156,65 @@ char *human_print(){
 	return str;
 }
 
+char *r_human_print(){			//wihout pc and sp
+	static char str[155];
+	char arg[6];
+	str[0]='\0';
+	
+	strcat(str, "Flags : cf = ");
+	itoa(cf, arg);
+	strcat(str, arg);
+	
+	strcat(str, ", p = ");
+	itoa(p, arg);
+	strcat(str, arg);
+	
+	strcat(str, ", ax = ");
+	itoa(ax, arg);
+	strcat(str, arg);
+	
+	strcat(str, ", z = ");
+	itoa(z, arg);
+	strcat(str, arg);
+	
+	strcat(str, ", s = ");
+	itoa(s, arg);
+	strcat(str, arg);
+	strcat(str, "\n");
+	
+	
+	
+	strcat(str, "Registers : a = ");
+	itoa(a, arg);
+	strcat(str, arg);
+	
+	strcat(str, ", b = ");
+	itoa(b, arg);
+	strcat(str, arg);
+	
+	strcat(str, ", c = ");
+	itoa(c, arg);
+	strcat(str, arg);
+	
+	strcat(str, ", d = ");
+	itoa(d, arg);
+	strcat(str, arg);
+	
+	strcat(str, ", e = ");
+	itoa(e, arg);
+	strcat(str, arg);
+	
+	strcat(str, ", h = ");
+	itoa(h, arg);
+	strcat(str, arg);
+	
+	strcat(str, ", l = ");
+	itoa(l, arg);
+	strcat(str, arg);
+	strcat(str, "\n");
+	
+	return str;
+}
 
 int dec_output(char *line, int code, int byte){
 	int i=byte-bytes(code);
@@ -215,7 +274,7 @@ static void write_help()
 		" -h  --help           output this message\n"
 		"\n"
 		"i80 have four modes :\n"
-		"1) -i --inter-mode            interactive mode\n"
+		"1) Wihout arguments           interactive mode\n"
 		"\n"
 		"2) -c --compile [FILE.as]     compiler\n"
 		"  * -o --out [FILE]     out file. Without this option compiler will write in \"out\"\n"
@@ -276,23 +335,14 @@ static int init_options(int argc, char **argv){
 	int one=0;
 	int in_files=0;
 	if(argc==1){
-		printf("The programm have no arguments\n");
-		printf("For help, type %s -h\n", argv[0]);
-		exit(1);
+		mode=INTERACTIVE_MODE;
+		return 0;	
 	}
 		
 	
 	for(int i=1; i<argc; i++){
 		
-		if(!strcmp(argv[i],"-i") || !strcmp(argv[i],"--interactive")){
-			if(mode==-1){
-				mode=INTERACTIVE_MODE;
-			}else{
-				error=MODE_ERROR;
-				return -1;
-			}
-				
-		}else if(!strcmp(argv[i],"-m") || !strcmp(argv[i],"--machine-print")){
+		if(!strcmp(argv[i],"-m") || !strcmp(argv[i],"--machine-print")){
 			if(ioutput!=MACHINE_OUTPUT)
 				ioutput=MACHINE_OUTPUT;
 			else{
@@ -436,7 +486,7 @@ static int order_options(){
 			}
 			fd_out=STDOUT;
 			out_order=byte_output;
-			write_regs = human_print;
+			write_regs = r_human_print;
 			
 		break;
 		case COMPILER_MODE:
@@ -495,4 +545,138 @@ void set_options(int argc, char **argv){
 	}
 
 	errorp();
+}
+
+char* compiler(char *text, int *lines){
+	char line[MAXLINE+1], *ret, *code=NULL;
+	int l, i, n, byte, li, len;
+	
+
+	ret = (char *) malloc(strlen(text));
+	strcpy(ret, text);
+	code = genschtalt(ret, &l);
+	
+	if(error){
+		*lines=l;
+		return NULL;
+	}
+	free(ret);
+	ret=NULL;
+	
+	l=1;
+	len=0;
+	
+	while(1){
+		
+		if(*code=='\0')
+			break;
+		
+		li=0;
+		while(*code!='\n')
+			line[li++]=*code++;
+		
+		line[li]='\0';	
+		code++;
+		
+		if(!li){
+			l++;
+			continue;
+		}
+		
+		n = quantity_args(line);
+		if((i=compile(line, n, &byte))==-1){
+			if(error)
+				break;
+			continue;
+		}
+		
+		out_order(line, i, byte*3);
+		if(line!=NULL){
+			len+=strlen(line);
+			ret = realloc(ret, len+1);
+			strcat(ret, line);
+		}	
+		l++;
+	}
+	
+	if(error){
+		return NULL;
+		*lines = l;
+	}
+	return ret;
+	
+}
+
+int execute_str(char *bin){
+	int *code;
+	char *reg_str;
+	
+	code = order_to_int(bin);
+	code = realloc(code, (MAX_ADDR+1)*sizeof(int));
+		
+	if(sizeof(code)>MAX_ADDR){
+		error=THE_PROGRAMM_IS_TOO_BIG;
+		return -1;
+	}	
+	
+	begin=pc=code;
+	end=sp=code+MAX_ADDR;
+		
+	
+	if(exec(*pc)==-1){
+		if(ioutput==HUMAN_OUTPUT)
+			printf("Error by executintg instruction number %i. Command: %s\n", prev_com+1, num_to_com(*(begin+prev_com)));
+	}
+			
+	if(pc>end || pc<begin)
+		pc=begin;
+	
+	reg_str=write_regs();
+	if(write(fd_out, reg_str, strlen(reg_str)) < 0)
+		err_sys("Write error");
+				
+	free(code);	
+	return 0;
+}
+
+int execute(char *bin){
+	int *code;
+	char *reg_str;
+	int ret;	
+	
+	code = order_to_int(bin);
+	code = realloc(code, (MAX_ADDR+1)*sizeof(int));
+		
+	if(sizeof(code)>MAX_ADDR){
+		error=THE_PROGRAMM_IS_TOO_BIG;
+		return -1;
+	}	
+	
+	begin=pc=code;
+	end=sp=code+MAX_ADDR;
+
+	while(1){
+		if((ret = exec(*pc))==-1){
+			if(ioutput==HUMAN_OUTPUT)
+				printf("Error by executintg instruction number %i. Command: %s\n", prev_com+1, num_to_com(*(begin+prev_com)));
+		}else if(!ret)
+			break;
+			
+		if(pc>end || pc<begin)
+			pc=begin;
+				
+		if(debug==DEBUG){
+			reg_str=write_regs();
+			if(write(fd_out, reg_str, strlen(reg_str)) < 0)
+				err_sys("Write error");	
+		}
+	}
+
+	reg_str=write_regs();
+	if(write(fd_out, reg_str, strlen(reg_str)) < 0)
+		err_sys("Write error");
+	
+	free(code);	
+	
+	return 0;
 }

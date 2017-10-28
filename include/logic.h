@@ -22,6 +22,7 @@
 #include <fcntl.h>
 #include <stdbool.h>
 
+
 bool debug, ioutput, output;
 int mode;
 int *fd_in;
@@ -32,12 +33,10 @@ char *(*write_regs)(void);
 
 
 void init_varibles();
-char *machine_print();
-char *human_print();
-int dec_output(char *, int, int);
-int byte_output(char *, int, int);
 void set_options(int, char **);
-
+char* compiler(char *, int *);
+int execute_str(char *);
+int execute(char *);
 
 #endif
 

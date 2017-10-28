@@ -2,7 +2,7 @@ include_dir    := include
 source_dir    := src
 compile_flags      := -Wall -MD -pipe
 
-sources= $(source_dir)/i80.c $(source_dir)/cpu.c $(source_dir)/compiler.c $(source_dir)/selector.c $(source_dir)/unfunc.c
+sources= $(source_dir)/i80.c $(source_dir)/cpu.c $(source_dir)/compiler.c $(source_dir)/logic.c $(source_dir)/unfunc.c
 objects= $(sources:.c=.o)
 prog_name = i80
 bin_dir=bin
@@ -18,8 +18,8 @@ $(bin_dir):
 $(source_dir)/i80.o: $(source_dir)/i80.c
 	gcc -o $@ -c $(compile_flags) $(source_dir)/i80.c 
 
-$(source_dir)/selector.o: $(source_dir)/selector.c
-	gcc -o $@ -c $(compile_flags) $(source_dir)/selector.c 
+$(source_dir)/logic.o: $(source_dir)/logic.c
+	gcc -o $@ -c $(compile_flags) $(source_dir)/logic.c 
 
 $(source_dir)/compiler.o: $(source_dir)/compiler.c
 	gcc -o $@ -c $(compile_flags) $(source_dir)/compiler.c 

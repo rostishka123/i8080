@@ -837,7 +837,7 @@ void error_selector(){
 				printf("Comma error\n");
 			break;
 			case LIMIT_ERROR:
-				printf("File is too big\n");
+				printf("File is too large\n");
 			break;
 			case STRING_TOO_LONG:
 				printf("The string is too long");
