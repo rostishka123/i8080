@@ -497,9 +497,9 @@ static int order_options(){
 				return -1;
 			}
 			if(fd_out==-1)
-				if((fd_out = open("out.r", O_RDONLY | O_CREAT, FILE_MODE)) < 0)
-					err_sys("Can't open file out.r");
+				fd_out = wropen("out.r");
 			
+				
 			if(output==DEC_OUTPUT)
 				out_order=dec_output;
 			else 

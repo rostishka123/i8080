@@ -37,7 +37,7 @@ int limit;
 #define ERROR 255
 
 #define NOT_KOMENT (!(str[0]>='0' && str[0]<='9'))
-#define FILE_MODE (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)
+#define FILE_MODE (S_IREAD | S_IWRITE)
 #define MAXLINE 251
 #define MAX_SIZE 4096
 #define STDOUT 1

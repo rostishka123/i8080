@@ -62,8 +62,10 @@ int main(int argc, char **argv){
 			
 			if(fd_out==STDOUT)
 				ch_append(ccode, '\n');
+			
 			if(write(fd_out, ccode, strlen(ccode)) < 0)
 				err_sys("Write error");
+			
 			free(ccode);
 		break;
 		
