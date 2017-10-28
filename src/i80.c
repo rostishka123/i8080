@@ -26,8 +26,8 @@ int main(int argc, char **argv){
 	switch(mode){
 		
 		case INTERACTIVE_MODE:
-			printf("To clear the terminal type : \"clear\"\n"
-			"To quit type : \"q\" or \"quit\"\n");
+			printf("To clear the terminal enter : \"clear\"\n"
+			"To quit enter : \"q\" or \"quit\"\n");
 			
 			while(1){
 				printf(">> ");

@@ -1,8 +1,8 @@
 i80 is a i8080 emulator, also i80 have a interactive mode. 
 You can compile and execute a i8080 code. 
-For more infomation type : i80 -h.
+For more infomation enter : i80 -h.
 
-To install type :
+To install enter :
 make && make install
 
 Commands and description i8080 processor :
